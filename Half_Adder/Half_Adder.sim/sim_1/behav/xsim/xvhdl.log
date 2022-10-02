@@ -1,0 +1,4 @@
+INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/scott/Desktop/vhdl/Half_Adder/Half_Adder.srcs/sources_1/new/Half_Adder.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'half_adder'
+INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/scott/Desktop/vhdl/Half_Adder/Half_Adder.srcs/sim_1/new/Test_Half_Adder.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'test_half_adder'
