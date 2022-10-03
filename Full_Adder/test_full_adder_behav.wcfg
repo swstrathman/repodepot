@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="test_full_adder_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="test_full_adder" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="127.001 ns"></ZoomEndTime>
+      <Cursor1Time time="30.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="276"></NameColumnWidth>
+      <ValueColumnWidth column_width="120"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="5" />
+   <wvobject fp_name="/test_full_adder/a_value" type="logic">
+      <obj_property name="ElementShortName">a_value</obj_property>
+      <obj_property name="ObjectShortName">a_value</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_full_adder/b_value" type="logic">
+      <obj_property name="ElementShortName">b_value</obj_property>
+      <obj_property name="ObjectShortName">b_value</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_full_adder/c_in_value" type="logic">
+      <obj_property name="ElementShortName">c_in_value</obj_property>
+      <obj_property name="ObjectShortName">c_in_value</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_full_adder/sum_value" type="logic">
+      <obj_property name="ElementShortName">sum_value</obj_property>
+      <obj_property name="ObjectShortName">sum_value</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_full_adder/c_out_value" type="logic">
+      <obj_property name="ElementShortName">c_out_value</obj_property>
+      <obj_property name="ObjectShortName">c_out_value</obj_property>
+   </wvobject>
+</wave_config>
