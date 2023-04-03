@@ -1,0 +1,125 @@
+; *********************************************
+; Course: EN.525.642.81.SP23 FPGA Design Using VHDL
+; Instructor: Keith Newlander
+; Assignment: Lab 6
+; File Name: lab6starter.psm
+; Name: Scott Strathman
+; Description: Assembly file for the Lab 6 calculator
+; *********************************************
+
+; *********************************************
+;			START SEQUENCE
+; *********************************************
+
+; Extra ASM to fix issue with Vivado (see documentation), Skips Address 03
+	JUMP cold_start
+	JUMP cold_start
+	JUMP cold_start
+	JUMP cold_start
+; Cold Start
+cold_start:
+
+; SLIDERS are assigned to PORT 02
+; PUSHBTNs are assigned to PORT 03
+; PUSHBTN(0) is used to add 1
+; PUSHBTN(1) is used to subtract 1
+; PUSHBTN(3) is used to reset design
+
+; NOTE: (s# usage):
+; s0,s1,s2 - Used in delay subroutines
+; s3	-	Stores global register for value to display10
+; s4	- 	Stores global register for value to display32
+; s5	-	Stores the debounced push btn signal
+; s6	-	Debounced register
+; s7	-	switches
+
+; *********************************************
+;				RESET
+; *********************************************
+
+	reset: 	LOAD s3, 00		;reset ALU setpoint to 0
+			OUTPUT s3, 04	;display reset values
+			LOAD s5, 00
+			LOAD s6, 00
+
+			;; wait for btn 3 to be depressed to exit reset state
+			INPUT s5, 03
+			TEST s5, 08
+			JUMP NZ, reset	;stay in reset until 'depressed'
+			
+; *********************************************
+;			MAIN LOOP
+; *********************************************
+
+	; STORE SWITCH VALUES
+	; Run debouncer on switches
+	; Check current state of switches to perform operation
+	mainlp:	INPUT s7, 02	; store switches
+			CALL del10ms	; delay 10ms
+			INPUT s6, 02	; store switches again
+			AND s7, s6		; AND switches to only keep signals high if held for 10ms
+
+	; CHECK WHICH SWITCH IS HIGH (IN ORDER OF PRECEDENCE)
+	; ADD SWITCH
+		TEST s7, 10
+		JUMP NZ, checkAddButton
+	; SUBTRACT SWITCH
+		TEST s7, 20
+		JUMP NZ, checkSubButton
+	; START LOOP AGAIN IF NO SWITCH IS HIGH
+		JUMP mainlp
+	
+	; CHECK IF BUTTON IS PRESSED FOR EACH OPERATION
+	; ELSE, JUMP TO MAINLP
+	checkAddButton: TEST s5, 01
+					JUMP NZ, opadd
+					JUMP mainlp
+	checkSubButton: TEST s5, 01
+					JUMP NZ, opsub
+	
+	; ADD	
+	opadd:	AND s7, 0F ; get rid of SW7-4 values
+			ADD s3, s7 ; add SW3-0 value to output register
+			; RETURN TO MAIN LOOP AFTER BUTTON IS NO LONGER BEING PUSHED
+			CALL opend
+			JUMP mainlp
+				
+	; SUBTRACT
+	opsub:	AND s7, 0F ; get rid of SW7-4 values
+			SUB s3, 01 ; subtract 1 from S3
+			; RETURN TO MAIN LOOP AFTER BUTTON IS NO LONGER BEING PUSHED
+			CALL opend
+			JUMP mainlp
+	
+; *********************************************
+;					OPEND
+; *********************************************
+
+	; OPEND ROUTINE PREVENTS MUTIPLE OPERATIONS FROM A SINGLE BUTTON PRESS
+	opend:	INPUT s5, 03
+			TEST s5, 01
+			JUMP NZ, opend
+			RETURN				
+
+; *********************************************
+;		HELPER FUNCTIONS FROM TESTPROG
+; *********************************************
+
+;(used for delay in top level, added a 10ms delay)
+	delms:	INPUT s0,07
+	delmslp:	INPUT s1,07
+			COMPARE s0,s1
+			JUMP Z, delmslp
+			RETURN
+			
+	del10ms:	LOAD s2, F5	;load 245
+	del10mslp:	CALL delms
+				ADD s2, 01
+				JUMP NZ, del10mslp
+				RETURN
+
+	del250ms:	LOAD s2, 05
+	del250mslp: CALL delms
+			ADD s2, 01
+			JUMP NZ, del250mslp
+			RETURN
