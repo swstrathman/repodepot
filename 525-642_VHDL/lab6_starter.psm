@@ -51,34 +51,37 @@ cold_start:
 ;			MAIN LOOP
 ; *********************************************
 
-	; STORE SWITCH VALUES
-	; Run debouncer on switches
-	; Check current state of switches to perform operation
-	mainlp:	INPUT s7, 02	; store switches
-			CALL del10ms	; delay 10ms
-			INPUT s6, 02	; store switches again
-			AND s7, s6		; AND switches to only keep signals high if held for 10ms
-
-	; CHECK WHICH SWITCH IS HIGH (IN ORDER OF PRECEDENCE)
-	; ADD SWITCH
+	; START MAIN LOOP
+	; DISPLAY CURRENT RESULT
+	mainlp:	
+		; update displays
+		OUTPUT s3, 04
+		; check which switch is high (order of precedence)
+		; add switch
+		INPUT s7, 02
+		AND s7, 10 ; mask all switches except add switch(SW4)
 		TEST s7, 10
 		JUMP NZ, checkAddButton
-	; SUBTRACT SWITCH
-		TEST s7, 20
-		JUMP NZ, checkSubButton
-	; START LOOP AGAIN IF NO SWITCH IS HIGH
+		; start loop again if no switch is high and reset is not pressed
+		INPUT s5, 03	; store push buttons
+		CALL del250ms	; delay 10ms
+		INPUT s6, 03	; store push buttons again
+		AND s5, s6		; AND push buttons to only keep signals high if held for 10ms
+		
 		JUMP mainlp
+		
 	
 	; CHECK IF BUTTON IS PRESSED FOR EACH OPERATION
 	; ELSE, JUMP TO MAINLP
-	checkAddButton: TEST s5, 01
+	checkAddButton: INPUT s5, 03
+					AND s5, 01
+					TEST s5, 01
 					JUMP NZ, opadd
 					JUMP mainlp
-	checkSubButton: TEST s5, 01
-					JUMP NZ, opsub
 	
 	; ADD	
-	opadd:	AND s7, 0F ; get rid of SW7-4 values
+	opadd:	INPUT s7, 02
+			AND s7, 0F ; get rid of SW7-4 values
 			ADD s3, s7 ; add SW3-0 value to output register
 			; RETURN TO MAIN LOOP AFTER BUTTON IS NO LONGER BEING PUSHED
 			CALL opend
