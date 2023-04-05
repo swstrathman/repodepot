@@ -54,42 +54,53 @@ cold_start:
 	; START MAIN LOOP
 	; DISPLAY CURRENT RESULT
 	mainlp:	
+	
 		; update displays
-		OUTPUT s3, 04
+			OUTPUT s3, 04
+			OUTPUT s4, 05
+			
 		; check which switch is high (order of precedence)
 		; add switch
-		INPUT s7, 02
-		AND s7, 10 ; mask all switches except add switch(SW4)
-		TEST s7, 10
-		JUMP NZ, checkAddButton
-		; start loop again if no switch is high and reset is not pressed
-		INPUT s5, 03	; store push buttons
-		CALL del250ms	; delay 10ms
-		INPUT s6, 03	; store push buttons again
-		AND s5, s6		; AND push buttons to only keep signals high if held for 10ms
+			INPUT s7, 02
+			AND s7, 10 ; mask all switches except add switch(SW4)
+			TEST s7, 10
+			JUMP NZ, checkAddButton
+		; subtract switch
+			INPUT s7, 02
+			AND s7, 20 ; mask all switches except sub switch(SW5)
+			TEST s7, 20
+			JUMP NZ, checkSubButton
 		
-		JUMP mainlp
+		; start loop again if no switch is high
+			JUMP mainlp
 		
 	
 	; CHECK IF BUTTON IS PRESSED FOR EACH OPERATION
 	; ELSE, JUMP TO MAINLP
-	checkAddButton: INPUT s5, 03
-					AND s5, 01
-					TEST s5, 01
+	checkAddButton: CALL testbtnr				
+					; Add if BTNR is pressed
 					JUMP NZ, opadd
+					JUMP mainlp
+					
+	checkSubButton: CALL testbtnr
+					; Subtract if BTNR is pressed
+					JUMP NZ, opsub
 					JUMP mainlp
 	
 	; ADD	
 	opadd:	INPUT s7, 02
 			AND s7, 0F ; get rid of SW7-4 values
 			ADD s3, s7 ; add SW3-0 value to output register
+			ADDCY s4, 00; check for carry bit and add to output register if high
 			; RETURN TO MAIN LOOP AFTER BUTTON IS NO LONGER BEING PUSHED
 			CALL opend
 			JUMP mainlp
 				
 	; SUBTRACT
-	opsub:	AND s7, 0F ; get rid of SW7-4 values
-			SUB s3, 01 ; subtract 1 from S3
+	opsub:	INPUT s7, 02
+			AND s7, 0F ; get rid of SW7-4 values
+			SUB s3, s7 ; subtract 1 from S3
+			SUBCY s4, 00; check for carry bit and add to output register if high
 			; RETURN TO MAIN LOOP AFTER BUTTON IS NO LONGER BEING PUSHED
 			CALL opend
 			JUMP mainlp
@@ -97,12 +108,31 @@ cold_start:
 ; *********************************************
 ;					OPEND
 ; *********************************************
-
 	; OPEND ROUTINE PREVENTS MUTIPLE OPERATIONS FROM A SINGLE BUTTON PRESS
 	opend:	INPUT s5, 03
 			TEST s5, 01
 			JUMP NZ, opend
 			RETURN				
+
+; *********************************************
+;			TESTBTNR
+; *********************************************
+	; STORE, DEBOUNCE, AND TEST BTNR
+	testbtnr:
+		INPUT s5, 03
+		CALL del10ms
+		INPUT s6, 03
+		AND s5, s6
+		; Check if BTNR is pressed
+		AND s5, 01
+		TEST s5, 01
+		RETURN
+		
+		
+; *********************************************
+;			CHECK OP BUTTON
+; *********************************************
+		
 
 ; *********************************************
 ;		HELPER FUNCTIONS FROM TESTPROG
