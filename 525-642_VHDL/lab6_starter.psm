@@ -80,6 +80,11 @@ cold_start:
 			AND s7, 20 ; mask all switches except sub switch(SW5)
 			TEST s7, 20
 			JUMP NZ, checkSubButton
+		; shift switch
+			INPUT s7, 02
+			AND s7, 40 ; mask all switches except shift switch(SW6)
+			TEST s7, 40
+			JUMP NZ, checkSLButton
 		
 		; start loop again if no switch is high
 			JUMP mainlp
@@ -97,6 +102,11 @@ cold_start:
 					JUMP NZ, opsub
 					JUMP mainlp
 	
+	checkSLButton: 	CALL testbtnr
+					; Shift if BTNR is pressed
+					JUMP NZ, opsl
+					JUMP mainlp
+	
 	; ADD	
 	opadd:	INPUT s7, 02
 			AND s7, 0F ; get rid of SW7-4 values
@@ -112,6 +122,19 @@ cold_start:
 			SUB s3, s7 ; subtract 1 from S3
 			SUBCY s4, 00; check for carry bit and add to output register if high
 			; RETURN TO MAIN LOOP AFTER BUTTON IS NO LONGER BEING PUSHED
+			CALL opend
+			JUMP mainlp
+	
+	; SHIFT LEFT
+	opsl:	INPUT s7, 02
+			AND s7, 0F ; get rid of SW7-4 values
+			TEST s7, 00 ; check if value is zero
+			JUMP NZ, mainlp ; and do not shift if zero
+	shiftlp:SL0 s3 ; shift display10 1 bit left
+			SLA s4 ; shift in carry bit to display32 if high
+			SUB s7, 01 ; subtract 1 from input value
+			TEST s7, 00 ; check if value is zero
+			JUMP NZ, shiftlp ; shift again if value is not zero yet
 			CALL opend
 			JUMP mainlp
 	
