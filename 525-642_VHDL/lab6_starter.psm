@@ -38,7 +38,9 @@ cold_start:
 ; *********************************************
 
 	reset: 	LOAD s3, 00		;reset ALU setpoint to 0
+			LOAD s4, 00
 			OUTPUT s3, 04	;display reset values
+			OUTPUT s4, 05
 			LOAD s5, 00
 			LOAD s6, 00
 
@@ -54,6 +56,14 @@ cold_start:
 	; START MAIN LOOP
 	; DISPLAY CURRENT RESULT
 	mainlp:	
+		
+		; Reset if BTND is high
+			INPUT s5, 03
+			CALL del10ms
+			INPUT s6, 03
+			AND s5, s6
+			TEST s5, 08
+			JUMP NZ, reset
 	
 		; update displays
 			OUTPUT s3, 04
