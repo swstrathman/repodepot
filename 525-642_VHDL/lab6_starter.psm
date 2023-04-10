@@ -125,15 +125,12 @@ cold_start:
 			CALL opend
 			JUMP mainlp
 	
-	; SHIFT LEFT
 	opsl:	INPUT s7, 02
 			AND s7, 0F ; get rid of SW7-4 values
-			TEST s7, 00 ; check if value is zero
-			JUMP NZ, mainlp ; and do not shift if zero
+			JUMP Z, mainlp ; and do not shift if zero
 	shiftlp:SL0 s3 ; shift display10 1 bit left
 			SLA s4 ; shift in carry bit to display32 if high
 			SUB s7, 01 ; subtract 1 from input value
-			TEST s7, 00 ; check if value is zero
 			JUMP NZ, shiftlp ; shift again if value is not zero yet
 			CALL opend
 			JUMP mainlp
