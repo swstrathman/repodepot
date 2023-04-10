@@ -32,6 +32,7 @@ cold_start:
 ; s5	-	Stores the debounced push btn signal
 ; s6	-	Debounced register
 ; s7	-	switches
+; s8,s9	-	storage registers for multiply value
 
 ; *********************************************
 ;				RESET
@@ -85,6 +86,11 @@ cold_start:
 			AND s7, 40 ; mask all switches except shift switch(SW6)
 			TEST s7, 40
 			JUMP NZ, checkSLButton
+		; mult switch
+			INPUT s7, 02
+			AND s7, 40 ; mask all switches except shift switch(SW6)
+			TEST s7, 80
+			JUMP NZ, checkMultButton
 		
 		; start loop again if no switch is high
 			JUMP mainlp
@@ -105,6 +111,11 @@ cold_start:
 	checkSLButton: 	CALL testbtnr
 					; Shift if BTNR is pressed
 					JUMP NZ, opsl
+					JUMP mainlp
+					
+	checkMultButton:CALL testbtnr
+					; Shift if BTNR is pressed
+					JUMP NZ, opmult
 					JUMP mainlp
 	
 	; ADD	
@@ -132,6 +143,18 @@ cold_start:
 			SLA s4 ; shift in carry bit to display32 if high
 			SUB s7, 01 ; subtract 1 from input value
 			JUMP NZ, shiftlp ; shift again if value is not zero yet
+			CALL opend
+			JUMP mainlp
+			
+	opmult: INPUT s7, 02
+			AND s7, 0F ; get rid of SW7-4 values
+			JUMP Z, reset ; reset if multiplying by zero
+	multlp: LOAD s8, s3 ; store original values
+			LOAD s9, s4
+			ADD s3, s8 ; add original value to current values
+			ADDCY s4, s9
+			SUB s7, 01 ;decrement number of times to add
+			JUMP NZ, multlp
 			CALL opend
 			JUMP mainlp
 	
