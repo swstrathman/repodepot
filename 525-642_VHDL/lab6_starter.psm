@@ -88,7 +88,7 @@ cold_start:
 			JUMP NZ, checkSLButton
 		; mult switch
 			INPUT s7, 02
-			AND s7, 40 ; mask all switches except shift switch(SW6)
+			AND s7, 80 ; mask all switches except shift switch(SW6)
 			TEST s7, 80
 			JUMP NZ, checkMultButton
 		
@@ -149,13 +149,14 @@ cold_start:
 	opmult: INPUT s7, 02
 			AND s7, 0F ; get rid of SW7-4 values
 			JUMP Z, reset ; reset if multiplying by zero
-	multlp: LOAD s8, s3 ; store original values
+			LOAD s8, s3 ; store original values
 			LOAD s9, s4
-			ADD s3, s8 ; add original value to current values
+	multlp:	SUB s7, 01 ;decrement number of times to add
+			JUMP Z, multend ;return if done adding	
+			ADD s3, s8 ; add original values to current values
 			ADDCY s4, s9
-			SUB s7, 01 ;decrement number of times to add
-			JUMP NZ, multlp
-			CALL opend
+			JUMP multlp
+	multend:CALL opend
 			JUMP mainlp
 	
 ; *********************************************
